@@ -36,98 +36,121 @@ module.exports = __toCommonJS(main_exports);
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
 function VitePluginApiGenerator(options = {}) {
-  const { folderName = "services", className = "Api", mode = "ts" } = options;
-  console.log(
+  const {
+    folderName = "services",
+    className = "Api",
+    mode = "ts",
+    log = true
+  } = options;
+  let watcher;
+  function logInfo(msg, enable = log) {
+    if (enable) {
+      console.log(msg);
+    }
+  }
+  function startWatching(folderName2, className2, mode2 = "ts") {
+    const modulesFolder = path.join("src", folderName2, "modules");
+    if (!fs.existsSync(modulesFolder)) {
+      logInfo(`Folder '${modulesFolder}' does not exist.`);
+      return;
+    }
+    watcher = fs.watch(
+      modulesFolder,
+      { recursive: true },
+      (eventType, filename) => {
+        if (filename && (path.extname(filename) === ".ts" || path.extname(filename) === ".js")) {
+          logInfo(`File ${filename} has been ${eventType}`);
+          generateApiFile(folderName2, className2, mode2);
+        }
+      }
+    );
+  }
+  function isModule(filePath) {
+    const content = fs.readFileSync(filePath, "utf-8");
+    return content.includes("export ");
+  }
+  function extractDescription(filePath) {
+    const content = fs.readFileSync(filePath, "utf-8");
+    const match = content.match(/\/\/ @description\s*(.*)/);
+    return match ? match[1].trim() : null;
+  }
+  function generateApiFile(folderName2, className2, mode2 = "ts") {
+    folderName2 = path.join("src", folderName2);
+    folderName2 = path.join(process.cwd(), folderName2);
+    const modulesFolder = path.join(folderName2, "modules");
+    if (!fs.existsSync(modulesFolder)) {
+      logInfo(`Folder '${modulesFolder}' does not exist.`);
+      return;
+    }
+    logInfo("modulesFolder " + modulesFolder);
+    const files = fs.readdirSync(modulesFolder);
+    const tsFiles = files.filter(
+      (file) => path.extname(file) === ".ts" || path.extname(file) === ".js"
+    );
+    logInfo("process.cwd() " + process.cwd());
+    logInfo("tsFiles " + tsFiles);
+    if (!tsFiles.length) {
+      logInfo(`No TypeScript files found in '${modulesFolder}'.`);
+      return;
+    }
+    const imports = [];
+    const exports2 = [];
+    tsFiles.forEach((tsFile) => {
+      if (isModule(path.join(modulesFolder, tsFile))) {
+        const fileName = path.basename(tsFile, `.${mode2}`);
+        const description = extractDescription(path.join(modulesFolder, tsFile));
+        logInfo(`Found module '${fileName}' in '${tsFile}'.`);
+        logInfo(`Description: ${description}`);
+        if (description) {
+          imports.push(
+            `import * as ${fileName} from './modules/${fileName}';
+`
+          );
+          exports2.push(`    /** ${description} */
+    ${fileName},
+`);
+        } else {
+          imports.push(
+            `import * as ${fileName} from './modules/${fileName}';
+`
+          );
+          exports2.push(`    ${fileName},
+`);
+        }
+      }
+    });
+    if (!imports.length) {
+      logInfo(`No valid modules found in '${modulesFolder}'.`);
+      return;
+    }
+    const indexTsContent = imports.join("") + `
+const ${className2} = {
+` + exports2.join("") + `}
+
+export default ${className2};
+`;
+    const indexTsPath = path.join(folderName2, `index.${mode2}`);
+    if (fs.existsSync(indexTsPath)) {
+      fs.unlinkSync(indexTsPath);
+    }
+    fs.writeFileSync(indexTsPath, indexTsContent, "utf-8");
+    logInfo(
+      `Generated '${indexTsPath}' successfully. Export ClassName: ${className2} !`
+    );
+  }
+  logInfo(
     `Generated '${folderName}' start. Export ClassName: ${className} ! Mode: ${mode}`
   );
   return {
     name: "vite-plugin-api-generator",
     buildStart() {
-      generateApiFile(folderName, className, mode);
+      if (!watcher) {
+        generateApiFile(folderName, className, mode);
+      }
       startWatching(folderName, className, mode);
     },
     buildEnd() {
-      console.log("API Generator Plugin Ended");
+      logInfo("API Generator Plugin Ended");
     }
   };
-}
-function startWatching(folderName, className, mode = "ts") {
-  const modulesFolder = path.join("src", folderName, "modules");
-  if (!fs.existsSync(modulesFolder)) {
-    console.log(`Folder '${modulesFolder}' does not exist.`);
-    return;
-  }
-  fs.watch(modulesFolder, { recursive: true }, (eventType, filename) => {
-    if (filename && (path.extname(filename) === ".ts" || path.extname(filename) === ".js")) {
-      console.log(`File ${filename} has been ${eventType}`);
-      generateApiFile(folderName, className, mode);
-    }
-  });
-}
-function isModule(filePath) {
-  const content = fs.readFileSync(filePath, "utf-8");
-  return content.includes("export ");
-}
-function extractDescription(filePath) {
-  const content = fs.readFileSync(filePath, "utf-8");
-  const match = content.match(/\/\/ @description\s*(.*)/);
-  return match ? match[1].trim() : null;
-}
-function generateApiFile(folderName, className, mode = "ts") {
-  folderName = path.join("src", folderName);
-  folderName = path.join(process.cwd(), folderName);
-  const modulesFolder = path.join(folderName, "modules");
-  if (!fs.existsSync(modulesFolder)) {
-    console.log(`Folder '${modulesFolder}' does not exist.`);
-    return;
-  }
-  console.log("modulesFolder " + modulesFolder);
-  const files = fs.readdirSync(modulesFolder);
-  const tsFiles = files.filter((file) => path.extname(file) === ".ts" || path.extname(file) === ".js");
-  console.log("process.cwd() " + process.cwd());
-  console.log("tsFiles " + tsFiles);
-  if (!tsFiles.length) {
-    console.log(`No TypeScript files found in '${modulesFolder}'.`);
-    return;
-  }
-  const imports = [];
-  const exports2 = [];
-  tsFiles.forEach((tsFile) => {
-    if (isModule(path.join(modulesFolder, tsFile))) {
-      const fileName = path.basename(tsFile, `.${mode}`);
-      const description = extractDescription(path.join(modulesFolder, tsFile));
-      console.log(`Found module '${fileName}' in '${tsFile}'.`);
-      console.log(`Description: ${description}`);
-      if (description) {
-        imports.push(`import * as ${fileName} from './modules/${fileName}';
-`);
-        exports2.push(`    /** ${description} */
-    ${fileName},
-`);
-      } else {
-        imports.push(`import * as ${fileName} from './modules/${fileName}';
-`);
-        exports2.push(`    ${fileName},
-`);
-      }
-    }
-  });
-  if (!imports.length) {
-    console.log(`No valid modules found in '${modulesFolder}'.`);
-    return;
-  }
-  const indexTsContent = imports.join("") + `
-const ${className} = {
-` + exports2.join("") + `}
-
-export default ${className};
-`;
-  const indexTsPath = path.join(folderName, `index.${mode}`);
-  if (fs.existsSync(indexTsPath)) {
-    fs.unlinkSync(indexTsPath);
-  }
-  fs.writeFileSync(indexTsPath, indexTsContent, "utf-8");
-  console.log(
-    `Generated '${indexTsPath}' successfully. Export ClassName: ${className} !`
-  );
 }

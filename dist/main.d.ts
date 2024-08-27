@@ -2,6 +2,7 @@ interface Options {
     folderName?: string;
     className?: string;
     mode?: 'ts' | 'js';
+    log?: boolean;
 }
 /**
  *
