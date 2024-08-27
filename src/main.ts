@@ -107,12 +107,12 @@ export default function VitePluginApiGenerator(options: Options = {}) {
         logInfo(`Description: ${description}`)
         if (description) {
           imports.push(
-            `import * as ${fileName} from './modules/${fileName}';\n`
+            `import * as ${fileName} from './modules/${fileName}'\n`
           )
           exports.push(`    /** ${description} */\n    ${fileName},\n`)
         } else {
           imports.push(
-            `import * as ${fileName} from './modules/${fileName}';\n`
+            `import * as ${fileName} from './modules/${fileName}'\n`
           )
           exports.push(`    ${fileName},\n`)
         }
@@ -130,7 +130,7 @@ export default function VitePluginApiGenerator(options: Options = {}) {
       `const ${className} = {\n` +
       exports.join('') +
       '}\n\n' +
-      `export default ${className};\n`
+      `export default ${className}\n`
 
     const indexTsPath = path.join(folderName, `index.${mode}`)
     if (fs.existsSync(indexTsPath)) {

@@ -103,7 +103,7 @@ function VitePluginApiGenerator(options = {}) {
         logInfo(`Description: ${description}`);
         if (description) {
           imports.push(
-            `import * as ${fileName} from './modules/${fileName}';
+            `import * as ${fileName} from './modules/${fileName}'
 `
           );
           exports2.push(`    /** ${description} */
@@ -111,7 +111,7 @@ function VitePluginApiGenerator(options = {}) {
 `);
         } else {
           imports.push(
-            `import * as ${fileName} from './modules/${fileName}';
+            `import * as ${fileName} from './modules/${fileName}'
 `
           );
           exports2.push(`    ${fileName},
@@ -127,7 +127,7 @@ function VitePluginApiGenerator(options = {}) {
 const ${className2} = {
 ` + exports2.join("") + `}
 
-export default ${className2};
+export default ${className2}
 `;
     const indexTsPath = path.join(folderName2, `index.${mode2}`);
     if (fs.existsSync(indexTsPath)) {

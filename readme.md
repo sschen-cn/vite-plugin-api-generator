@@ -53,6 +53,7 @@ export default {
       folderName: 'services' // src/services will be generated, you can change it to any string, default is'services'
       className: 'Api', // any string, default is 'Api'
       mode: 'ts' // 'ts' | 'js',default is 'ts' 
+      log: true // boolean, default is true
     })
   ]
 }
