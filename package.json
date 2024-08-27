@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf dist/ && tsc"
+    "build": "rimraf dist/ && tsup src/main.ts --dts --no-splitting"
   },
   "keywords": [],
   "author": "",
