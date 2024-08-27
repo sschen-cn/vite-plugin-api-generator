@@ -1,10 +1,10 @@
-## vite-plugin-api-generator
+# vite-plugin-api-generator
 
 gererate default api interface for vite project
 
 ## example
 
-```
+```bash
 example
 ├── src
 │   ├── services
@@ -12,6 +12,7 @@ example
 │   │   │   ├── login.ts
 │   │   │   └── profile.ts
 ```
+
 Auto generate `src/services/index.ts` and watched `src/services/modules` directory.
 
 ```ts
@@ -26,18 +27,17 @@ export const Api = {
 }
 ```
 
-
-
 ## Install
 
 ```bash
 npm install vite-plugin-api-generator
 ```
+
 or
+
 ```bash
 yarn add vite-plugin-api-generator
 ```
-
 
 ## Usage
 
