@@ -32,6 +32,9 @@ export default function VitePluginApiGenerator(options: Options = {}) {
       console.log(msg)
     }
   }
+  function logError(msg: string) {
+    console.log(`!!!Error: ${msg}`)
+  }
   function startWatching(
     folderName: string,
     className: string,
@@ -106,14 +109,10 @@ export default function VitePluginApiGenerator(options: Options = {}) {
         logInfo(`Found module '${fileName}' in '${tsFile}'.`)
         logInfo(`Description: ${description}`)
         if (description) {
-          imports.push(
-            `import * as ${fileName} from './modules/${fileName}'\n`
-          )
+          imports.push(`import * as ${fileName} from './modules/${fileName}'\n`)
           exports.push(`    /** ${description} */\n    ${fileName},\n`)
         } else {
-          imports.push(
-            `import * as ${fileName} from './modules/${fileName}'\n`
-          )
+          imports.push(`import * as ${fileName} from './modules/${fileName}'\n`)
           exports.push(`    ${fileName},\n`)
         }
       }
@@ -133,15 +132,34 @@ export default function VitePluginApiGenerator(options: Options = {}) {
       `export default ${className}\n`
 
     const indexTsPath = path.join(folderName, `index.${mode}`)
-    if (fs.existsSync(indexTsPath)) {
-      fs.unlinkSync(indexTsPath)
+    const tempFilePath = `${indexTsPath}.tmp`
+    // 删除临时文件的函数
+    function deleteTempFile(filePath: string) {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath)
+      }
     }
-
-    fs.writeFileSync(indexTsPath, indexTsContent, 'utf-8')
-
-    logInfo(
-      `Generated '${indexTsPath}' successfully. Export ClassName: ${className} !`
-    )
+    // 尝试写入临时文件
+    try {
+      fs.writeFileSync(tempFilePath, indexTsContent, 'utf-8')
+    } catch (writeError) {
+      deleteTempFile(tempFilePath)
+      logError(`Failed to write temporary file: ${writeError}`)
+      return
+    }
+    // 尝试重命名临时文件为目标文件
+    try {
+      if (fs.existsSync(indexTsPath)) {
+        fs.unlinkSync(indexTsPath)
+      }
+      fs.renameSync(tempFilePath, indexTsPath)
+      logInfo(
+        `Generated '${indexTsPath}' successfully. Export ClassName: ${className} !`
+      )
+    } catch (renameError) {
+      deleteTempFile(tempFilePath)
+      logError(`Failed to rename temporary file: ${renameError}`)
+    }
   }
 
   logInfo(

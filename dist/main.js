@@ -48,6 +48,9 @@ function VitePluginApiGenerator(options = {}) {
       console.log(msg);
     }
   }
+  function logError(msg) {
+    console.log(`!!!Error: ${msg}`);
+  }
   function startWatching(folderName2, className2, mode2 = "ts") {
     const modulesFolder = path.join("src", folderName2, "modules");
     if (!fs.existsSync(modulesFolder)) {
@@ -102,18 +105,14 @@ function VitePluginApiGenerator(options = {}) {
         logInfo(`Found module '${fileName}' in '${tsFile}'.`);
         logInfo(`Description: ${description}`);
         if (description) {
-          imports.push(
-            `import * as ${fileName} from './modules/${fileName}'
-`
-          );
+          imports.push(`import * as ${fileName} from './modules/${fileName}'
+`);
           exports2.push(`    /** ${description} */
     ${fileName},
 `);
         } else {
-          imports.push(
-            `import * as ${fileName} from './modules/${fileName}'
-`
-          );
+          imports.push(`import * as ${fileName} from './modules/${fileName}'
+`);
           exports2.push(`    ${fileName},
 `);
         }
@@ -130,13 +129,31 @@ const ${className2} = {
 export default ${className2}
 `;
     const indexTsPath = path.join(folderName2, `index.${mode2}`);
-    if (fs.existsSync(indexTsPath)) {
-      fs.unlinkSync(indexTsPath);
+    const tempFilePath = `${indexTsPath}.tmp`;
+    function deleteTempFile(filePath) {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
-    fs.writeFileSync(indexTsPath, indexTsContent, "utf-8");
-    logInfo(
-      `Generated '${indexTsPath}' successfully. Export ClassName: ${className2} !`
-    );
+    try {
+      fs.writeFileSync(tempFilePath, indexTsContent, "utf-8");
+    } catch (writeError) {
+      deleteTempFile(tempFilePath);
+      logError(`Failed to write temporary file: ${writeError}`);
+      return;
+    }
+    try {
+      if (fs.existsSync(indexTsPath)) {
+        fs.unlinkSync(indexTsPath);
+      }
+      fs.renameSync(tempFilePath, indexTsPath);
+      logInfo(
+        `Generated '${indexTsPath}' successfully. Export ClassName: ${className2} !`
+      );
+    } catch (renameError) {
+      deleteTempFile(tempFilePath);
+      logError(`Failed to rename temporary file: ${renameError}`);
+    }
   }
   logInfo(
     `Generated '${folderName}' start. Export ClassName: ${className} ! Mode: ${mode}`
