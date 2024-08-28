@@ -17,13 +17,11 @@ example
 ```ts
 // src/services/modules/login.ts
 /** @description login api */
-export const loginApi = {
-  login: (username: string, password: string) => {
-    // login logic
-  },
-  logout: () => {
-    // logout logic
-  }
+export const login = (username: string, password: string) => {
+  // login logic
+}
+export const logout = () => {
+  // logout logic
 }
 ```
 
