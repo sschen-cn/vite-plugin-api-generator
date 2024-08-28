@@ -86,14 +86,11 @@ export default function VitePluginApiGenerator(options: Options = {}) {
       logInfo(`Folder '${modulesFolder}' does not exist.`)
       return
     }
-    logInfo('modulesFolder ' + modulesFolder)
     const files = fs.readdirSync(modulesFolder)
     const tsFiles = files.filter(
       (file) => path.extname(file) === '.ts' || path.extname(file) === '.js'
     )
     // 打印当前环境绝对路径
-    logInfo('process.cwd() ' + process.cwd())
-    logInfo('tsFiles ' + tsFiles)
     if (!tsFiles.length) {
       logInfo(`No TypeScript files found in '${modulesFolder}'.`)
       return
@@ -154,7 +151,7 @@ export default function VitePluginApiGenerator(options: Options = {}) {
       }
       fs.renameSync(tempFilePath, indexTsPath)
       logInfo(
-        `Generated '${indexTsPath}' successfully. Export ClassName: ${className} !`
+        `Generated '${indexTsPath}' successfully, Mode: ${mode}. Export ClassName: ${className} !`
       )
     } catch (renameError) {
       deleteTempFile(tempFilePath)
@@ -163,7 +160,7 @@ export default function VitePluginApiGenerator(options: Options = {}) {
   }
 
   logInfo(
-    `Generated '${folderName}' start. Export ClassName: ${className} ! Mode: ${mode}`
+    `Generated '${folderName}' start, Mode: ${mode}. Export ClassName: ${className} !`
   )
   return {
     name: 'vite-plugin-api-generator',
