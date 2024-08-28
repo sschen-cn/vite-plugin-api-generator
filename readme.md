@@ -11,6 +11,20 @@ example
 │   │   ├── modules
 │   │   │   ├── login.ts
 │   │   │   └── profile.ts
+│   │   │   └── ...
+```
+
+```ts
+// src/services/modules/login.ts
+/** @description login api */
+export const loginApi = {
+  login: (username: string, password: string) => {
+    // login logic
+  },
+  logout: () => {
+    // logout logic
+  }
+}
 ```
 
 Auto generate `src/services/index.ts` and watched `src/services/modules` directory.
@@ -25,6 +39,12 @@ export const Api = {
   /** @description profile api */
   profile
 }
+```
+
+```ts
+import { Api } from './services'
+
+Api.login.login('username', 'password')
 ```
 
 ## Install
