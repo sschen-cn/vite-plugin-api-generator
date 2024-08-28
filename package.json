@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-api-generator",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "api module generator for vite",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
