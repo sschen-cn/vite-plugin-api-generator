@@ -18,7 +18,7 @@ interface Options {
  * @param {boolean} options.log - 是否打印日志，默认为true
  * @returns
  */
-export default function VitePluginApiGenerator(options: Options = {}) {
+export function VitePluginApiGenerator(options: Options = {}) {
   const {
     folderName = 'services',
     className = 'Api',

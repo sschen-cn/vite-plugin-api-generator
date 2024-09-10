@@ -30,7 +30,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/main.ts
 var main_exports = {};
 __export(main_exports, {
-  default: () => VitePluginApiGenerator
+  VitePluginApiGenerator: () => VitePluginApiGenerator
 });
 module.exports = __toCommonJS(main_exports);
 var fs = __toESM(require("fs"));
@@ -168,3 +168,7 @@ export default ${className2}
     }
   };
 }
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  VitePluginApiGenerator
+});

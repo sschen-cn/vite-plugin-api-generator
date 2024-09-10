@@ -19,4 +19,4 @@ declare function VitePluginApiGenerator(options?: Options): {
     buildEnd(): void;
 };
 
-export { VitePluginApiGenerator as default };
+export { VitePluginApiGenerator };
