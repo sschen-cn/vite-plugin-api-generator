@@ -19,12 +19,7 @@ interface Options {
  * @returns
  */
 export function VitePluginApiGenerator(options: Options = {}) {
-  const {
-    folderName = 'services',
-    className = 'Api',
-    mode = 'ts',
-    log = true,
-  } = options
+  const { folderName = 'services', className = 'Api', mode = 'ts', log = true } = options
   let watcher: any
 
   function logInfo(msg: string, enable: boolean = log) {
@@ -35,30 +30,19 @@ export function VitePluginApiGenerator(options: Options = {}) {
   function logError(msg: string) {
     console.log(`!!!Error: ${msg}`)
   }
-  function startWatching(
-    folderName: string,
-    className: string,
-    mode: 'ts' | 'js' = 'ts'
-  ) {
+  function startWatching(folderName: string, className: string, mode: 'ts' | 'js' = 'ts') {
     const modulesFolder = path.join('src', folderName, 'modules')
     if (!fs.existsSync(modulesFolder)) {
       logInfo(`Folder '${modulesFolder}' does not exist.`)
       return
     }
 
-    watcher = fs.watch(
-      modulesFolder,
-      { recursive: true },
-      (eventType, filename) => {
-        if (
-          filename &&
-          (path.extname(filename) === '.ts' || path.extname(filename) === '.js')
-        ) {
-          logInfo(`File ${filename} has been ${eventType}`)
-          generateApiFile(folderName, className, mode)
-        }
+    watcher = fs.watch(modulesFolder, { recursive: true }, (eventType, filename) => {
+      if (filename && (path.extname(filename) === '.ts' || path.extname(filename) === '.js')) {
+        logInfo(`File ${filename} has been ${eventType}`)
+        generateApiFile(folderName, className, mode)
       }
-    )
+    })
   }
 
   function isModule(filePath: string): boolean {
@@ -72,11 +56,7 @@ export function VitePluginApiGenerator(options: Options = {}) {
     return match ? match[1].trim() : null
   }
 
-  function generateApiFile(
-    folderName: string,
-    className: string,
-    mode: 'ts' | 'js' = 'ts'
-  ) {
+  function generateApiFile(folderName: string, className: string, mode: 'ts' | 'js' = 'ts') {
     // 确保folderName是相对于src的路径
     folderName = path.join('src', folderName)
     folderName = path.join(process.cwd(), folderName)
@@ -159,19 +139,22 @@ export function VitePluginApiGenerator(options: Options = {}) {
     }
   }
 
-  logInfo(
-    `Generated '${folderName}' start, Mode: ${mode}. Export ClassName: ${className} !`
-  )
+  logInfo(`Generated '${folderName}' start, Mode: ${mode}. Export ClassName: ${className} !`)
   return {
     name: 'vite-plugin-api-generator',
-    buildStart() {
+    buildStart(options: any) {
       if (!watcher) {
         generateApiFile(folderName, className, mode)
       }
-      startWatching(folderName, className, mode)
+    },
+    config(_config: any, { command }: { command: 'build' | 'serve' }) {
+      logInfo(`API Generator Plugin Config, Command: ${command}`)
+      if (command !== 'build') {
+        startWatching(folderName, className, mode)
+      }
     },
     buildEnd() {
       logInfo('API Generator Plugin Ended')
-    },
+    }
   }
 }
