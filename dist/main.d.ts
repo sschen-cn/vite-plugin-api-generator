@@ -15,7 +15,10 @@ interface Options {
  */
 declare function VitePluginApiGenerator(options?: Options): {
     name: string;
-    buildStart(): void;
+    config(_config: any, { command }: {
+        command: "build" | "serve";
+    }): void;
+    buildStart(options: any): void;
     buildEnd(): void;
 };
 

@@ -57,6 +57,7 @@ function VitePluginApiGenerator(options = {}) {
       logInfo(`Folder '${modulesFolder}' does not exist.`);
       return;
     }
+    generateApiFile(folderName2, className2, mode2);
     watcher = fs.watch(
       modulesFolder,
       { recursive: true },
@@ -157,11 +158,16 @@ export default ${className2}
   );
   return {
     name: "vite-plugin-api-generator",
-    buildStart() {
+    config(_config, { command }) {
+      logInfo(`API Generator Plugin Config, Command: ${command}`);
+      if (command !== "build") {
+        startWatching(folderName, className, mode);
+      }
+    },
+    buildStart(options2) {
       if (!watcher) {
         generateApiFile(folderName, className, mode);
       }
-      startWatching(folderName, className, mode);
     },
     buildEnd() {
       logInfo("API Generator Plugin Ended");
